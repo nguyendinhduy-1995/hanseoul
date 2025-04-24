@@ -11,7 +11,9 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 def chatbot_handler():
     try:
         data = request.get_json()
+        print("📥 Nhận từ người dùng:", data)  # In toàn bộ JSON vào log
         user_input = data.get("message", "")
+        print("📌 Tin nhắn khách:", user_input)
 
         chat_completion = client.chat.completions.create(
             model="gpt-4-1106-preview",
