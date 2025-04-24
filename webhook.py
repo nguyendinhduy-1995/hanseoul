@@ -4,11 +4,14 @@ import openai
 import requests
 import json
 
+from openai import OpenAI
+
 webhook = Blueprint('webhook', __name__)
 
 VERIFY_TOKEN = "hanseoul123"
 PAGE_ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
-openai.api_key = os.getenv("OPENAI_API_KEY")
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @webhook.route('/webhook', methods=['GET', 'POST'])
 def handle_webhook():
@@ -43,14 +46,14 @@ def chat_with_gpt(message):
         "- Luôn ưu tiên giữ lịch, upsell tự nhiên, gợi cảm giác FOMO (sợ bỏ lỡ)."
     )
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": system_msg},
                 {"role": "user", "content": message}
             ]
         )
-        return response['choices'][0]['message']['content']
+        return response.choices[0].message.content
     except Exception as e:
         print("Lỗi GPT:", e)
         return "Dạ hệ thống đang bận, Han sẽ nhắn lại sau chị nha!"
@@ -69,10 +72,10 @@ def send_message(recipient_id, text):
 @webhook.route('/check-gpt')
 def check_gpt():
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": "Xin chào"}]
         )
-        return response['choices'][0]['message']['content']
+        return response.choices[0].message.content
     except Exception as e:
         return str(e)
