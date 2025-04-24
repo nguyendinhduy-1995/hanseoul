@@ -53,6 +53,7 @@ def chat_with_gpt(message):
         )
         return response['choices'][0]['message']['content']
     except Exception as e:
+        print(f"Lỗi GPT: {e}")
         return "Dạ hệ thống đang bận, Han sẽ nhắn lại sau chị nha!"
 
 def send_message(recipient_id, text):
@@ -65,7 +66,8 @@ def send_message(recipient_id, text):
     }, ensure_ascii=False).encode('utf-8')
 
     requests.post(url, headers=headers, params=params, data=data)
-    @app.route('/check-gpt')
+
+@webhook.route('/check-gpt')
 def check_gpt():
     try:
         response = openai.ChatCompletion.create(
@@ -73,6 +75,4 @@ def check_gpt():
             messages=[{"role": "user", "content": "Xin chào"}]
         )
         return response['choices'][0]['message']['content']
-    except Exception as e:
-        return str(e)
-
+    except
