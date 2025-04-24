@@ -3,12 +3,12 @@ import os
 import openai
 import requests
 import json
-from threading import Thread
 
 webhook = Blueprint('webhook', __name__)
 
 VERIFY_TOKEN = "hanseoul123"
 PAGE_ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
+
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @webhook.route('/webhook', methods=['GET', 'POST'])
@@ -24,17 +24,14 @@ def handle_webhook():
         payload = request.get_json()
         for entry in payload.get('entry', []):
             for event in entry.get('messaging', []):
+                if event.get('message', {}).get('is_echo'):
+                    continue  # Bỏ qua tin nhắn của bot gửi chính nó
+                sender_id = event['sender']['id']
                 if 'message' in event and 'text' in event['message']:
-                    if 'is_echo' in event['message']:
-                        continue
-                    Thread(target=process_message, args=(event,)).start()
+                    user_message = event['message']['text']
+                    reply = chat_with_gpt(user_message)
+                    send_message(sender_id, reply)
         return Response("Event Received", status=200)
-
-def process_message(event):
-    sender_id = event['sender']['id']
-    user_message = event['message']['text']
-    reply = chat_with_gpt(user_message)
-    send_message(sender_id, reply)
 
 def chat_with_gpt(message):
     system_msg = (
@@ -58,7 +55,7 @@ def chat_with_gpt(message):
         )
         return response.choices[0].message.content
     except Exception as e:
-        print("Lỗi GPT:", e)
+        print(f"Lỗi GPT: {e}")
         return "Dạ hệ thống đang bận, Han sẽ nhắn lại sau chị nha!"
 
 def send_message(recipient_id, text):
@@ -70,8 +67,8 @@ def send_message(recipient_id, text):
         "message": {"text": text}
     }, ensure_ascii=False).encode('utf-8')
 
-    response = requests.post(url, headers=headers, params=params, data=data)
-    print("Facebook status:", response.status_code, response.text)
+    res = requests.post(url, headers=headers, params=params, data=data)
+    print("Gửi tới FB:", res.status_code, res.text)
 
 @webhook.route('/check-gpt')
 def check_gpt():
