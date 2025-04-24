@@ -41,7 +41,7 @@ Cách tư vấn các dịch vụ: Sẹo, Tàn nhang, Nám, Rạn da theo quy tr�
         """
 
         completion = openai.ChatCompletion.create(
-            model="gpt-4.1",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message}
