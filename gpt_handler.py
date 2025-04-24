@@ -2,6 +2,7 @@ from flask import Flask, request, Response
 import openai
 import os
 import json
+import subprocess
 
 app = Flask(__name__)
 
@@ -40,14 +41,14 @@ Cách tư vấn các dịch vụ: Sẹo, Tàn nhang, Nám, Rạn da theo quy tr�
 6. Xin lịch hẹn và thông tin
         """
 
-        completion = openai.ChatCompletion.create(
+        completion = openai.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message}
             ]
         )
-        reply = completion['choices'][0]['message']['content']
+        reply = completion.choices[0].message.content
         return Response(
             json.dumps({"reply": reply}, ensure_ascii=False),
             content_type="application/json; charset=utf-8"
@@ -57,12 +58,11 @@ Cách tư vấn các dịch vụ: Sẹo, Tàn nhang, Nám, Rạn da theo quy tr�
             json.dumps({"error": str(e)}, ensure_ascii=False),
             content_type="application/json; charset=utf-8"
         )
-        @app.route('/check-openai')
+
+@app.route('/check-openai')
 def check_openai():
     try:
-        import subprocess
-        result = subprocess.check_output(['pip', 'show', 'openai'], text=True)
+        result = subprocess.check_output(["python3", "-m", "pip", "show", "openai"], text=True)
         return f"<pre>{result}</pre>"
     except Exception as e:
         return f"Lỗi: {str(e)}"
-
