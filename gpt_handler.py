@@ -66,3 +66,5 @@ def check_openai():
         return f"<pre>{result}</pre>"
     except Exception as e:
         return f"Lỗi: {str(e)}"
+from webhook import webhook
+app.register_blueprint(webhook)
