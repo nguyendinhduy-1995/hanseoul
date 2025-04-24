@@ -65,3 +65,14 @@ def send_message(recipient_id, text):
     }, ensure_ascii=False).encode('utf-8')
 
     requests.post(url, headers=headers, params=params, data=data)
+    @app.route('/check-gpt')
+def check_gpt():
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": "Xin chào"}]
+        )
+        return response['choices'][0]['message']['content']
+    except Exception as e:
+        return str(e)
+
