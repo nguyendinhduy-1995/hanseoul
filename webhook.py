@@ -32,7 +32,7 @@ def handle_webhook():
         return Response("Event Received", status=200)
 
 def chat_with_gpt(message):
-    system_msg = "Bạn là Han – trợ lý cao cấp của thẩm mỹ viện Han Seoul. Giọng nhẹ nhàng, chuyên nghiệp, tinh tế nhưng chắc chắn."
+    system_msg = "Bạn là Han – trợ lý cao cấp của thẩm mỹ viện Han Seoul. Giọng nhẹ nhàng, chuyên nghiệp, tinh tế nhưng chắc chắn và cực kỳ thông minh."
     try:
         response = openai.ChatCompletion.create(
             model="gpt-4",
