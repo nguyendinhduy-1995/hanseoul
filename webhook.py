@@ -8,7 +8,6 @@ webhook = Blueprint('webhook', __name__)
 
 VERIFY_TOKEN = "hanseoul123"
 PAGE_ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
-
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @webhook.route('/webhook', methods=['GET', 'POST'])
@@ -53,7 +52,7 @@ def chat_with_gpt(message):
         )
         return response['choices'][0]['message']['content']
     except Exception as e:
-        print(f"Lỗi GPT: {e}")
+        print("Lỗi GPT:", e)
         return "Dạ hệ thống đang bận, Han sẽ nhắn lại sau chị nha!"
 
 def send_message(recipient_id, text):
@@ -75,4 +74,5 @@ def check_gpt():
             messages=[{"role": "user", "content": "Xin chào"}]
         )
         return response['choices'][0]['message']['content']
-    except
+    except Exception as e:
+        return str(e)
