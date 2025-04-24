@@ -3,15 +3,13 @@ import os
 import openai
 import requests
 import json
-
-from openai import OpenAI
+from threading import Thread
 
 webhook = Blueprint('webhook', __name__)
 
 VERIFY_TOKEN = "hanseoul123"
 PAGE_ACCESS_TOKEN = os.getenv("PAGE_ACCESS_TOKEN")
-
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @webhook.route('/webhook', methods=['GET', 'POST'])
 def handle_webhook():
@@ -26,12 +24,17 @@ def handle_webhook():
         payload = request.get_json()
         for entry in payload.get('entry', []):
             for event in entry.get('messaging', []):
-                sender_id = event['sender']['id']
                 if 'message' in event and 'text' in event['message']:
-                    user_message = event['message']['text']
-                    reply = chat_with_gpt(user_message)
-                    send_message(sender_id, reply)
+                    if 'is_echo' in event['message']:
+                        continue
+                    Thread(target=process_message, args=(event,)).start()
         return Response("Event Received", status=200)
+
+def process_message(event):
+    sender_id = event['sender']['id']
+    user_message = event['message']['text']
+    reply = chat_with_gpt(user_message)
+    send_message(sender_id, reply)
 
 def chat_with_gpt(message):
     system_msg = (
@@ -46,7 +49,7 @@ def chat_with_gpt(message):
         "- Luôn ưu tiên giữ lịch, upsell tự nhiên, gợi cảm giác FOMO (sợ bỏ lỡ)."
     )
     try:
-        response = client.chat.completions.create(
+        response = openai.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": system_msg},
@@ -67,12 +70,13 @@ def send_message(recipient_id, text):
         "message": {"text": text}
     }, ensure_ascii=False).encode('utf-8')
 
-    requests.post(url, headers=headers, params=params, data=data)
+    response = requests.post(url, headers=headers, params=params, data=data)
+    print("Facebook status:", response.status_code, response.text)
 
 @webhook.route('/check-gpt')
 def check_gpt():
     try:
-        response = client.chat.completions.create(
+        response = openai.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": "Xin chào"}]
         )
