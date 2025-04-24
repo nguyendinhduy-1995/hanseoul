@@ -16,7 +16,7 @@ def hanseoul():
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4.1",
             messages=[
                 {
                     "role": "system",
@@ -31,8 +31,6 @@ Phong cách tư vấn:
 - Tư vấn ngắn gọn và luôn tạo cảm giác nhanh nhanh vì ở Han Seoul đông khách không chốt ngay thì mất cơ hội
 - Biết dẫn dắt – định hướng – xử lý từ chối thông minh.
 - Luôn ưu tiên giữ lịch, upsell tự nhiên, gợi cảm giác FOMO (sợ bỏ lỡ).
-
-... (cắt bớt phần tài liệu nếu dài quá – anh có thể dùng biến `prompt_base` lưu ở ngoài nếu cần)
                     """
                 },
                 {
