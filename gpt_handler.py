@@ -2,6 +2,7 @@
 from flask import Flask, request, jsonify
 import os
 from openai import OpenAI
+import traceback
 
 app = Flask(__name__)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -29,5 +30,6 @@ def chatbot_handler():
         reply = chat_completion.choices[0].message.content
         return jsonify({"reply": reply})
     except Exception as e:
-        print("LỖI GPT:", str(e))
-        return jsonify({"error": "GPT lỗi xử lý"}), 500
+        print("🛑 LỖI GPT:", str(e))
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
