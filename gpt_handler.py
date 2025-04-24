@@ -57,3 +57,12 @@ Cách tư vấn các dịch vụ: Sẹo, Tàn nhang, Nám, Rạn da theo quy tr�
             json.dumps({"error": str(e)}, ensure_ascii=False),
             content_type="application/json; charset=utf-8"
         )
+        @app.route('/check-openai')
+def check_openai():
+    try:
+        import subprocess
+        result = subprocess.check_output(['pip', 'show', 'openai'], text=True)
+        return f"<pre>{result}</pre>"
+    except Exception as e:
+        return f"Lỗi: {str(e)}"
+
