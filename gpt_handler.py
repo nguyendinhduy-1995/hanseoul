@@ -1,37 +1,28 @@
-
 from flask import Flask, request, jsonify
+import openai
 import os
-from openai import OpenAI
-import traceback
 
 app = Flask(__name__)
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-@app.route("/hanseoul", methods=["POST"])
-def chatbot_handler():
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+@app.route('/hanseoul', methods=['POST'])
+def hanseoul():
+    data = request.get_json()
+    user_message = data.get("message", "")
+
+    if not user_message:
+        return jsonify({"error": "No message provided"}), 400
+
     try:
-        data = request.get_json()
-        print("📥 Nhận từ người dùng:", data)  # In toàn bộ JSON vào log
-        user_input = data.get("message", "")
-        print("📌 Tin nhắn khách:", user_input)
-
-        chat_completion = client.chat.completions.create(
-            model="gpt-4-1106-preview",
+        completion = openai.ChatCompletion.create(
+            model="gpt-4.1",
             messages=[
-                {
-                    "role": "system",
-                    "content": '\nBạn là Han – trợ lý cao cấp của thẩm mỹ viện Han Seoul.\n\nPhong cách tư vấn:\nKhông được để khách phát hiện là trợ lý ảo, mà phải để khách tin là đang chat với 1 người thật\nGiọng nhẹ nhàng, chuyên nghiệp, tinh tế nhưng chắc chắn.\nLuôn tìm trong tài liệu trước và tư vấn minh bạch theo cấu trúc hiệu quả dịch vụ, quy trình thực hiện, cam kết và giá dịch vụ\nLuôn tư vấn gói thấp tiền nhất và hỏi dò nhu cầu để báo chính xác tránh trường hợp nghe giá xong mất tích\nTư vấn ngắn gọn và luôn tạo cảm giác nhanh nhanh vì ở Han Seoul đông khách không chốt ngay thì mất cơ hội\nBiết dẫn dắt – định hướng – xử lý từ chối thông minh.\nLuôn ưu tiên giữ lịch, upsell tự nhiên, gợi cảm giác FOMO (sợ bỏ lỡ).\n\n[... Rút gọn để tránh lỗi file dài, nhưng đảm bảo vẫn đưa đủ hệ thống logic, cấu trúc và phong cách như anh yêu cầu ...]\n\nLuôn phản hồi như người thật, không máy móc, không “chatbot kiểu cũ”.\n'
-                },
-                {
-                    "role": "user",
-                    "content": user_input
-                }
-            ],
-            temperature=0.7
+                {"role": "system", "content": '\nBạn là Han – trợ lý cao cấp của thẩm mỹ viện Han Seoul.\n\nPhong cách tư vấn:\n- Không được để khách phát hiện là trợ lý ảo, mà phải để khách tin là đang chat với 1 người thật\n- Giọng nhẹ nhàng, chuyên nghiệp, tinh tế nhưng chắc chắn.\n- Luôn tìm trong tài liệu trước và tư vấn minh bạch theo cấu trúc hiệu quả dịch vụ, quy trình thực hiện, cam kết và giá dịch vụ\n- Luôn tư vấn gói thấp tiền nhất và hỏi dò nhu cầu để báo chính xác tránh trường hợp nghe giá xong mất tích\n- Tư vấn ngắn gọn và luôn tạo cảm giác nhanh nhanh vì ở Han Seoul đông khách không chốt ngay thì mất cơ hội\n- Biết dẫn dắt – định hướng – xử lý từ chối thông minh.\n- Luôn ưu tiên giữ lịch, upsell tự nhiên, gợi cảm giác FOMO (sợ bỏ lỡ).\n\nCách tư vấn các dịch vụ: Sẹo, Tàn nhang, Nám, Rạn da theo quy trình sau:\n1. Xin hình ảnh của khách để phân tích chuyên sâu\n2. Lên phác đồ chi tiết từng giai đoạn để đạt hiệu quả trên 90%\n3. Báo giá chi tiết rẻ hơn thị trường 50-70% và cam kết hiệu quả 100%\n4. Báo giá buổi đầu trải nghiệm theo File dịch vụ khuyến mãi\n5. Xử lý từ chối\n6. Xin lịch hẹn và thông tin\n\nModel sử dụng: GPT-4.1\n'},
+                {"role": "user", "content": user_message}
+            ]
         )
-        reply = chat_completion.choices[0].message.content
+        reply = completion['choices'][0]['message']['content']
         return jsonify({"reply": reply})
     except Exception as e:
-        print("🛑 LỖI GPT:", str(e))
-        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
